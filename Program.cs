@@ -18,19 +18,25 @@ builder.Services.AddDbContext<DataContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+    );
+});
+
 
 var app = builder.Build();
-
-
-
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
-
 }
 
 // Đăng ký middleware
@@ -42,11 +48,8 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-
-
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 app.Run();
