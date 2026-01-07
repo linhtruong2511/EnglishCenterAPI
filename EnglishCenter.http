@@ -1,0 +1,6 @@
+@EnglishCenter_HostAddress = http://localhost:5141
+
+GET {{EnglishCenter_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
