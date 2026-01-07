@@ -50,8 +50,10 @@ namespace EnglishCenter.Services
 
         async Task<IEnumerable<Course>> ICourseService.GetCourses(string? name)
         {
-            var courses = await context.Courses.Where(c => c.Name.Contains(name ?? ""))
+            var courses = await context.Courses
+                .Where(c => c.Name.Contains(name ?? ""))
                 .Include(c => c.Category)
+                .Include(c => c.Tags)
                 .OrderByDescending(c => c.Name)
                 .ToListAsync();
 
