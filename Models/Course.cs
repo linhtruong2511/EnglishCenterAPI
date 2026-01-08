@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EnglishCenter.Models;
 
 namespace EnglishCenter.Model
 {
@@ -14,5 +15,6 @@ namespace EnglishCenter.Model
         public int CategoryId { get; set; }
         public Category Category { get; set; }
         public ICollection<Tag> Tags { get; set; }
+        public ICollection<Section> Sections { get; set; }
     }
 }

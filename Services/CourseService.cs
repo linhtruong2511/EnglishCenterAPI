@@ -8,9 +8,12 @@ namespace EnglishCenter.Services
     public class CourseService : ICourseService
     {
         private DataContext context;
-
-        public CourseService(DataContext context, IWebHostEnvironment env)
+        private IFileService fileService;
+        public CourseService(DataContext context,
+            IWebHostEnvironment env,
+            IFileService file)
         {
+            this.fileService = file;
             this.context = context;
         }
 
@@ -37,7 +40,11 @@ namespace EnglishCenter.Services
 
         async Task<Course> ICourseService.GetCourseById(int id)
         {
-            var course = await context.Courses.FindAsync(id);
+            var course = await context.Courses
+                .Include(c => c.Sections.OrderBy(s => s.Order))
+                    .ThenInclude(s => s.Lessons.OrderBy(l => l.Order))
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (course is not null)
             {
                 return course;
@@ -84,7 +91,8 @@ namespace EnglishCenter.Services
 
             if (course is not null)
             {
-                var imageUrl = await file.SaveImageAsync("course");
+                //var imageUrl = await file.SaveImageAsync("course");
+                var imageUrl = await fileService.SaveImageAsync(file, "images/courses");
                 course.ImageUrl = imageUrl;
                 context.Update(course);
                 context.SaveChanges();

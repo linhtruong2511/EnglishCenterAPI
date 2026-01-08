@@ -15,15 +15,19 @@ namespace EnglishCenter.Services
         private UserManager<User> userManager;
         private readonly IConfiguration _config;
         private IHttpContextAccessor http;
+        private IFileService fileService;
 
         public AuthService(UserManager<User> userManager,
             IConfiguration config,
-            IHttpContextAccessor http)
+            IHttpContextAccessor http,
+            IFileService fileService)
         {
             this.userManager = userManager;
             _config = config;
             this.http = http;
+            this.fileService = fileService;
         }
+
         async Task<User> IAuthService.GetUser(string id)
         {
             if (string.IsNullOrEmpty(id)) throw new ArgumentException("Thông tin không hợp lệ");
@@ -129,7 +133,7 @@ namespace EnglishCenter.Services
             var currentUser = await userManager.GetUserAsync(user);
             if (currentUser is not null)
             {
-                var result = await file.SaveImageAsync("Avatar");
+                var result = await fileService.SaveImageAsync(file, "images/avatar");
                 currentUser.Avatar = result;
             }
             return currentUser;

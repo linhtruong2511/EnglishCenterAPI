@@ -12,5 +12,7 @@ namespace EnglishCenter.Data
         public virtual DbSet<Course> Courses { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
+        public virtual DbSet<Lesson> Lessons { get; set; }
+        public virtual DbSet<Section> Sections{ get; set; }
     }
 }
