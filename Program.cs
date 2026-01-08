@@ -19,6 +19,8 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<ISectionService, SectionService>();
+builder.Services.AddScoped<ILessonService, LessonService>();
 
 // Add Identity Service
 builder.Services.AddIdentity<User, IdentityRole>()
