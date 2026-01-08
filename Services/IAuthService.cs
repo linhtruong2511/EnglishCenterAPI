@@ -7,7 +7,7 @@ namespace EnglishCenter.Services
 {
     public interface IAuthService
     {
-        Task<JwtSecurityToken> Login(string email, string password);
+        Task<LoginResponse> Login(string email, string password);
         Task<User> Register(UserRegisterDto user);
         Task<User> ChangePassword(User user, string newPassword, string currentPassword);
         Task ForgotPassword(string email);

@@ -26,11 +26,12 @@ namespace EnglishCenter.Controllers
         [HttpPost("login")] 
         public async Task<IActionResult> Login(string email, string password)
         {
-            var token = new JwtSecurityTokenHandler().WriteToken(await authService.Login(email, password));
-            return Ok(new
+            var result = await authService.Login(email, password);
+            if (result is null)
             {
-                Token = token,
-            });
+                return BadRequest("Đăng nhập thất bại");
+            }
+            return Ok(result);
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegisterDto dto)

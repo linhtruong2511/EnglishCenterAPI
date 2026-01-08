@@ -47,7 +47,7 @@ namespace EnglishCenter.Services
             throw new NotImplementedException("Chưa triển khai");
         }
 
-        async Task<JwtSecurityToken> IAuthService.Login(string email, string password)
+        async Task<LoginResponse> IAuthService.Login(string email, string password)
         {
             var user = await userManager.FindByEmailAsync(email);
             if (user is null || !await userManager.CheckPasswordAsync(user, password))
@@ -67,7 +67,7 @@ namespace EnglishCenter.Services
                 Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
             );
 
-            var token = new JwtSecurityToken(
+            var token = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
@@ -75,9 +75,20 @@ namespace EnglishCenter.Services
                     int.Parse(_config["Jwt:ExpireMinutes"]!)
                 ),
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
-            );
+            ));
 
-            return token;
+            return new LoginResponse { 
+                User = new UserResponseDto
+                {
+                    Id = user.Id,
+                    Avatar = user.Avatar,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                },
+                Token = token
+            };
         }
 
         async Task IAuthService.Logout()
