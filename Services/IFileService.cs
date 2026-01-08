@@ -6,7 +6,7 @@
         Task<string> SaveVideoAsync(IFormFile file, string folder);
         Task<string> SaveAudioAsync(IFormFile file, string folder);
         Task<string> SaveFileAsync(IFormFile file, string folder);
-        void Delete(string publicPath);
+        void Delete(string? publicPath);
         bool Exists(string publicPath);
     }
 }

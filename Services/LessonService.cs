@@ -82,16 +82,19 @@ namespace EnglishCenter.Services
             if (dto.File != null)
             {
                 var fileUrl = await fileService.SaveFileAsync(dto.File, "files/lessons");
+                fileService.Delete(existing.fileUrl);
                 existing.fileUrl = fileUrl;
             }
             if (dto.Image != null)
             {
                 var imageUrl = await fileService.SaveImageAsync(dto.Image, "images/lessons");
+                fileService.Delete(existing.imageUrl);
                 existing.imageUrl = imageUrl;
             }
             if (dto.Video != null)
             {
                 var videoUrl = await fileService.SaveVideoAsync(dto.Video, "videos/lessons");
+                fileService.Delete(existing.videoUrl);
                 existing.videoUrl = videoUrl;
             }
 

@@ -90,7 +90,7 @@ namespace EnglishCenter.Services
         }
 
         /* ================= DELETE ================= */
-        public void Delete(string publicPath)
+        public void Delete(string? publicPath)
         {
             if (string.IsNullOrWhiteSpace(publicPath))
                 return;
