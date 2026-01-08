@@ -1,6 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using EnglishCenter.Authorization;
+using EnglishCenter.DTO;
+using EnglishCenter.Extensions;
 using EnglishCenter.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -11,20 +14,37 @@ namespace EnglishCenter.Services
     {
         private UserManager<User> userManager;
         private readonly IConfiguration _config;
+        private IHttpContextAccessor http;
 
-        public AuthService(UserManager<User> userManager, IConfiguration config)
+        public AuthService(UserManager<User> userManager,
+            IConfiguration config,
+            IHttpContextAccessor http)
         {
             this.userManager = userManager;
             _config = config;
+            this.http = http;
         }
-        Task<User> IAuthService.ChangePassword(User user, string newPassword)
+        async Task<User> IAuthService.GetUser(string id)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(id)) throw new ArgumentException("Thông tin không hợp lệ");
+            var user = await userManager.FindByIdAsync(id);
+            if (user is null) throw new Exception("Không tìm thấy user hợp lệ");
+            return user;
+
+        }
+        async Task<User> IAuthService.ChangePassword(User user, string newPassword, string currentPassword)
+        {
+            var userEntity = await userManager.FindByEmailAsync(user.Email!);
+            if (userEntity is null) throw new Exception("Thông tin xác thực người dùng không chính xác");
+            var result = await userManager.ChangePasswordAsync(userEntity, currentPassword, newPassword);
+            if (!result.Succeeded)
+                throw new Exception("Đổi mật khẩu không thành công");
+            return userEntity;
         }
 
         Task IAuthService.ForgotPassword(string email)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Chưa triển khai");
         }
 
         async Task<JwtSecurityToken> IAuthService.Login(string email, string password)
@@ -60,14 +80,59 @@ namespace EnglishCenter.Services
             return token;
         }
 
-        Task IAuthService.Logout()
+        async Task IAuthService.Logout()
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Chưa triển khai");
         }
 
-        Task<User> IAuthService.Register(User user)
+        async Task<User> IAuthService.Register(UserRegisterDto dto)
         {
-            throw new NotImplementedException();
+            var existedUser = await userManager.FindByEmailAsync(dto.Email!);
+            if (existedUser is not null) throw new Exception("Email đã được sử dụng");
+            var user = new User
+            {
+                UserName = dto.Email,
+                Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                throw new Exception(string.Join(", ",
+                    result.Errors.Select(e => e.Description)));
+            }
+            await userManager.AddToRoleAsync(user, Roles.STUDENT.ToString());
+            return user;
         }
+
+        async Task<User> IAuthService.GetUser(ClaimsPrincipal user)
+        {
+            return await userManager.GetUserAsync(user);
+        }
+
+        async Task<User> IAuthService.UploadAvatar(ClaimsPrincipal user, IFormFile file)
+        {
+            var currentUser = await userManager.GetUserAsync(user);
+            if (currentUser is not null)
+            {
+                var result = await file.SaveImageAsync("Avatar");
+                currentUser.Avatar = result;
+            }
+            return currentUser;
+        }
+        async Task<User> IAuthService.UpdateProfile(ClaimsPrincipal user, UpdateProfileDto dto)
+        {
+            var currentUser = await userManager.GetUserAsync(user);
+            if (currentUser is not null)
+            {
+                currentUser.FirstName = dto.FirstName;
+                currentUser.LastName = dto.LastName;
+            }
+            return currentUser;
+        }
+
     }
 }
